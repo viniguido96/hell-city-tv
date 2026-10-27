@@ -1673,12 +1673,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.width = (int) w;
             lp.height = (int) h;
             glass.setLayoutParams(lp);
-            // With ambient_glow off nothing else asks root for a layout pass, and the glass kept its 10dp
-            // placeholder size: size it now, the next pass agrees with this.
-            glass.layout(0, 0, (int) w, (int) h);
             // GlassView draws its slab inset by pad, i.e. exactly over the zoomed tile: same corners as the tile.
             glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), density) * scale);
         }
+        // With ambient_glow off nothing else asks root for a layout pass, and the glass kept its 10dp
+        // placeholder size: size it here whenever it is off, the next pass agrees with this.
+        if (glass.getWidth() != (int) w || glass.getHeight() != (int) h) glass.layout(0, 0, (int) w, (int) h);
         glassCardW = card.getWidth();
         glassTargetX = x;
         glassTargetY = y;
