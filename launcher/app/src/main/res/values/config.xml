@@ -499,6 +499,9 @@
     </string-array>
     <!-- HELL CITY header: date, network and segment clock drawn by HellHeaderView; the top bar is hidden. -->
     <bool name="hell_header">true</bool>
+    <!-- Tiles at this percent of their worked-out size, and their corner radius (dp) at the design width. -->
+    <integer name="tile_scale_percent">80</integer>
+    <integer name="tile_corner_dp">2</integer>
     <!-- A tile per passthrough input, after the dock: "inputId=Label=banner_name"; inputId "menu" opens the Inputs menu. -->
     <string-array name="input_tiles" translatable="false">
         <item>menu=HDMI 1 · 2 · 3=banner_hc_hdmi</item>
