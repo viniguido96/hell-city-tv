@@ -2,7 +2,7 @@
   "wallpaper": true,
   "wallpaper_true_color": true,
   "glass_style": "glass",
-  "ambient_glow": true,
+  "ambient_glow": false,
   "app_glow": true,
   "background_color": "#0C0C0C",
   "hidden_apps": [
