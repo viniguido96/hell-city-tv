@@ -448,8 +448,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambient.forceHasOverlappingRendering(false);
         ambientGlow = cfg.ambientGlow;
         appGlow = cfg.appGlow;
-        // INVISIBLE, not GONE: with the glow view out of the layout the focus glass stopped sizing to its tile.
-        if (!ambientGlow) ambient.setVisibility(View.INVISIBLE);
+        if (!ambientGlow) ambient.setVisibility(View.GONE);
         heroName = findViewById(R.id.heroName);
         hero = findViewById(R.id.hero);
         // The hero is now a group (name, and the cinematic lines): without this every fade of the default
@@ -1674,6 +1673,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.width = (int) w;
             lp.height = (int) h;
             glass.setLayoutParams(lp);
+            // With ambient_glow off nothing else asks root for a layout pass, and the glass kept its 10dp
+            // placeholder size: size it now, the next pass agrees with this.
+            glass.layout(0, 0, (int) w, (int) h);
             // GlassView draws its slab inset by pad, i.e. exactly over the zoomed tile: same corners as the tile.
             glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), density) * scale);
         }
