@@ -176,6 +176,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean advancedEffects;
     private TextView greeting;
     private View clockBlock;
+    private HellHeaderView hellHeader;
     private View btnInputs;
     /** config show_inputs_pill: false keeps the Inputs pill hidden even when the TV has inputs. */
     private boolean showInputsPill = true;
@@ -467,6 +468,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         clockBlock = findViewById(R.id.leftBlock);
         greetingColor = greeting.getCurrentTextColor();
         if (!cfg.showGreeting) greeting.setVisibility(View.GONE);
+        if (getResources().getBoolean(R.bool.hell_header)) {
+            // The top bar is replaced: the HELL CITY header draws the date, network and clock itself.
+            findViewById(R.id.topButtons).setVisibility(View.GONE);
+            hellHeader = new HellHeaderView(this);
+            int w = getResources().getDisplayMetrics().widthPixels;
+            root.addView(hellHeader, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                    HellHeaderView.heightFor(w), Gravity.TOP));
+        }
         if (cfg.headerWhite) {
             // The clock's own white for the date and the line before it, instead of their dimmed whites.
             ((TextView) findViewById(R.id.date)).setTextColor(Color.WHITE);
@@ -2475,7 +2484,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void updateClockVisibility() {
         boolean valid = System.currentTimeMillis() >= TIME_VALID_AFTER_MS;
-        clockBlock.setVisibility(valid ? View.VISIBLE : View.INVISIBLE);
+        clockBlock.setVisibility(hellHeader != null ? View.GONE : valid ? View.VISIBLE : View.INVISIBLE);
         handler.removeCallbacks(clockCheck);
         if (valid) {
             updateGreeting();
@@ -2652,6 +2661,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         } catch (Exception ignored) {
         }
+        if (hellHeader != null) hellHeader.setNetwork(online ? text : null);
         // With a VPN app configured, a VPN that is down matters too: show a red "VPN off" capsule then.
         boolean vpnDown = !vpn && online && !vpnApp.isEmpty();
         if (vpnPill) updateVpnPill(vpn);
