@@ -26,7 +26,7 @@ import java.util.Random;
  */
 final class HellHeaderView extends View {
     static final float DESIGN_W = 1920f, DESIGN_H = 300f;
-    private static final float CLOCK_SCALE = 0.8f, CLOCK_PIVOT_X = 1824f, CLOCK_PIVOT_Y = 70f;
+    private static final float CLOCK_SCALE = 0.7f, CLOCK_PIVOT_X = 1824f, CLOCK_PIVOT_Y = 70f;
 
     private static final int AMBER = 0xFFDCA229, INK = 0xFF0C0C0C, MUTED = 0xFF8A7A48;
     private static final int RED = 0xFFE3242B, GLITCH_RED = 0xFFFF2A4F, GLITCH_CYAN = 0xFF28E6F0;
@@ -124,7 +124,7 @@ final class HellHeaderView extends View {
         Calendar now = Calendar.getInstance();
         drawDate(canvas, now);
         drawNetwork(canvas);
-        // The clock at 80% of its design size, pinned at its top-right corner.
+        // The clock at 70% of its design size, pinned at its top-right corner.
         canvas.save();
         canvas.scale(CLOCK_SCALE, CLOCK_SCALE, CLOCK_PIVOT_X, CLOCK_PIVOT_Y);
         drawClock(canvas, String.format(Locale.ROOT, "%02d:%02d", now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE)));
