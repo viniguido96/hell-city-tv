@@ -1,0 +1,23 @@
+{
+  "wallpaper": true,
+  "wallpaper_true_color": true,
+  "glass_style": "glass",
+  "ambient_glow": true,
+  "app_glow": true,
+  "background_color": "#0C0C0C",
+  "hidden_apps": [
+    "com.tcl.tv",
+    "com.tcl.browser",
+    "com.tcl.ui_mediaCenter",
+    "com.tcl.smartalexa",
+    "com.tcl.notereminder",
+    "com.tcl.partnercustomizer",
+    "com.tcl.tv.tclhome_master",
+    "com.tcl.tvweishi",
+    "com.tcl.MultiScreenInteraction_TV",
+    "com.hbo.hbonow",
+    "br.eddy.tvhome",
+    "com.spocky.projengmenu",
+    "com.esaba.downloader"
+  ]
+}
