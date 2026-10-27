@@ -3208,7 +3208,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         popup.setWidth(Math.max(width, Math.min(panel.getMeasuredWidth(), (int) (360 * density))));
 
         int alignment = getResources().getBoolean(R.bool.rtl_menu_bar) != underGear ? Gravity.END : Gravity.START;
-        dropIn(popup, panel, anchor, alignment);
+        if (inputsAnchor != null) {
+            // Opened from a tile low on the screen: the list rises above the tile instead of running off the bottom.
+            int[] at = new int[2];
+            anchor.getLocationInWindow(at);
+            popup.showAtLocation(root, Gravity.NO_GRAVITY, at[0],
+                    Math.max(0, at[1] - panel.getMeasuredHeight() - (int) (10 * density)));
+        } else {
+            dropIn(popup, panel, anchor, alignment);
+        }
         for (int i = 0; i < rows.getChildCount(); i++) {
             View child = rows.getChildAt(i);
             if (child.getVisibility() == View.VISIBLE && child.isFocusable()) { child.requestFocus(); break; }
