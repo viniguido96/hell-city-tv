@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Starting window of Home: the theme's wallpaper, so the screen is never black while Home loads. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/hell_boot"
+    android:gravity="fill" />

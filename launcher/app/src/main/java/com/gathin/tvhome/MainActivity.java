@@ -177,6 +177,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView greeting;
     private View clockBlock;
     private HellHeaderView hellHeader;
+    private BootGlitchView bootGlitch;
+    /** Play the boot glitch at the next onResume: Home's first showing, and each time the TV wakes. */
+    private boolean bootGlitchDue = true;
+    private final BroadcastReceiver screenOnReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            bootGlitchDue = true;
+            if (hasWindowFocus()) playBootGlitch();
+        }
+    };
+
+    private void playBootGlitch() {
+        if (bootGlitch == null || !bootGlitchDue) return;
+        bootGlitchDue = false;
+        bootGlitch.play();
+        hellHeader.burstNow();
+    }
     /** The tile the Inputs menu hangs from while it is opened from an input_tiles "menu" tile. */
     private View inputsAnchor;
     private View btnInputs;
@@ -479,6 +495,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             int w = getResources().getDisplayMetrics().widthPixels;
             root.addView(hellHeader, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                     HellHeaderView.heightFor(w), Gravity.TOP));
+            bootGlitch = new BootGlitchView(this);
+            root.addView(bootGlitch, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT));
+            registerReceiver(screenOnReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
         }
         if (cfg.headerWhite) {
             // The clock's own white for the date and the line before it, instead of their dimmed whites.
@@ -956,6 +976,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onResume() {
         super.onResume();
+        playBootGlitch();
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
             recreate();
@@ -1230,6 +1251,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(packageReceiver);
+        if (bootGlitch != null) unregisterReceiver(screenOnReceiver);
         wallpaperPlayer.close();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);

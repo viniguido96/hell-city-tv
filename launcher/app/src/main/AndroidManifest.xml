@@ -80,6 +80,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.TvHome.Hell"
             android:exported="true"
             android:launchMode="singleTask"
             android:stateNotNeeded="true"

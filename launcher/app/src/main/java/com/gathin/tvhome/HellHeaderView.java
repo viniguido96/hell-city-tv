@@ -29,8 +29,11 @@ final class HellHeaderView extends View {
     private static final float CLOCK_SCALE = 0.7f, CLOCK_PIVOT_X = 1824f, CLOCK_PIVOT_Y = 70f;
 
     private static final int AMBER = 0xFFDCA229, INK = 0xFF0C0C0C, MUTED = 0xFF8A7A48;
-    private static final int RED = 0xFFE3242B, GLITCH_RED = 0xFFFF2A4F, GLITCH_CYAN = 0xFF28E6F0;
+    // The clock in the AirPlay tile's cyan, with red and violet copies offset behind it.
+    private static final int CLOCK = 0xFF5FE3E8, GLITCH_RED = 0xFFFF2A4F, GLITCH_CYAN = 0xFFB44CFF, CLOCK_BAR = 0xFFE3242B;
     private static final String[] JP_WEEKDAY = {"日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"};
+    private static final String[] ZH_WEEKDAY = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+    private final String[] weekday;
     // Segments a..g of each digit, as in a seven-segment display.
     private static final String[] SEGMENTS = {"abcdef", "bc", "abged", "abgcd", "fgbc", "afgcd", "afgedc", "abc", "abcdefg", "abcfgd"};
 
@@ -64,6 +67,14 @@ final class HellHeaderView extends View {
         @Override public void onReceive(Context c, Intent i) { invalidate(); }
     };
 
+    /** A glitch burst right away (the TV just woke), then the usual schedule. */
+    void burstNow() {
+        removeCallbacks(burst);
+        burstFrame = 0;
+        invalidate();
+        postDelayed(burst, BURST_FRAME_MS);
+    }
+
     private void scheduleBurst() {
         removeCallbacks(burst);
         postDelayed(burst, 15_000 + random.nextInt(10_000));
@@ -81,6 +92,7 @@ final class HellHeaderView extends View {
 
     HellHeaderView(Context ctx) {
         super(ctx);
+        weekday = "zh".equals(ctx.getResources().getString(R.string.hell_lang)) ? ZH_WEEKDAY : JP_WEEKDAY;
         bold = ctx.getResources().getFont(R.font.barlow_condensed_bold);
         medium = ctx.getResources().getFont(R.font.barlow_condensed_medium);
         stroke.setStyle(Paint.Style.STROKE);
@@ -147,7 +159,7 @@ final class HellHeaderView extends View {
         text.setLetterSpacing(0.06f);
         text.setColor(MUTED);
         String line = dateFormat.format(now.getTime()).toUpperCase(new Locale("pt", "BR"))
-                + " · " + JP_WEEKDAY[now.get(Calendar.DAY_OF_WEEK) - 1];
+                + " · " + weekday[now.get(Calendar.DAY_OF_WEEK) - 1];
         c.drawText(line, 213, 162, text);
     }
 
@@ -188,23 +200,23 @@ final class HellHeaderView extends View {
             }
             c.save();
             for (RectF r : slices) c.clipOutRect(r);
-            clockLayer(c, time, x, y, w, h, gap, RED, 255);
+            clockLayer(c, time, x, y, w, h, gap, CLOCK, 255);
             c.restore();
             for (int i = 0; i < slices.length; i++) {
                 c.save();
                 c.clipRect(slices[i]);
                 clockLayer(c, time, x + (random.nextBoolean() ? 1 : -1) * (20 + random.nextInt(45)), y, w, h, gap,
-                        i == 1 ? GLITCH_CYAN : RED, 255);
+                        i == 1 ? GLITCH_CYAN : CLOCK, 255);
                 c.restore();
             }
         } else {
-            clockLayer(c, time, x, y, w, h, gap, RED, 255);
+            clockLayer(c, time, x, y, w, h, gap, CLOCK, 255);
         }
         c.restore();
         int digits = 0;
         for (int i = 0; i < time.length(); i++) if (time.charAt(i) != ':') digits++;
         float width = digits * (w + gap) + 30;
-        fill.setColor(GLITCH_CYAN);
+        fill.setColor(CLOCK_BAR);
         fill.setAlpha(180);
         c.drawRect(x + width * 0.45f, y + h + 14, x + width * 0.80f, y + h + 17, fill);
         fill.setAlpha(255);

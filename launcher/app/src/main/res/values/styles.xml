@@ -6,6 +6,11 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
+    <!-- Home only: the starting window shows the HELL CITY picture at once instead of black while Home loads. -->
+    <style name="Theme.TvHome.Hell">
+        <item name="android:windowBackground">@drawable/hell_boot_window</item>
+    </style>
+
     <!-- Frosted pill, tvOS style. -->
     <style name="TopButtonBase">
         <item name="android:layout_width">wrap_content</item>
