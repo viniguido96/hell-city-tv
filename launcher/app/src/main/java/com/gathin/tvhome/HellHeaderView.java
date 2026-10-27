@@ -40,11 +40,11 @@ final class HellHeaderView extends View {
     private final Typeface bold, medium;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("pt", "BR"));
     private String network;
-    // Glitch bursts: every 20-40 s while Home is on screen, a few frames 55 ms apart, then still again.
-    private static final int BURST_FRAMES = 7;
-    private static final long BURST_FRAME_MS = 55;
+    // Glitch bursts: every 15-25 s while Home is on screen, about 0.8 s of frames, then still again.
+    private static final int BURST_FRAMES = 12;
+    private static final long BURST_FRAME_MS = 65;
     private final Random random = new Random();
-    private final RectF[] slices = {new RectF(), new RectF()};
+    private final RectF[] slices = {new RectF(), new RectF(), new RectF()};
     private int burstFrame = -1;
     private final Runnable burst = new Runnable() {
         @Override public void run() {
@@ -65,7 +65,7 @@ final class HellHeaderView extends View {
 
     private void scheduleBurst() {
         removeCallbacks(burst);
-        postDelayed(burst, 20_000 + random.nextInt(20_000));
+        postDelayed(burst, 15_000 + random.nextInt(10_000));
     }
 
     @Override protected void onWindowVisibilityChanged(int visibility) {
@@ -169,7 +169,7 @@ final class HellHeaderView extends View {
     private void drawClock(Canvas c, String time) {
         final float x = 1430, y = 70, w = 64, h = 120, gap = 22;
         boolean glitching = burstFrame >= 0;
-        float spread = glitching ? 9 + random.nextInt(10) : 5;
+        float spread = glitching ? 12 + random.nextInt(16) : 5;
         c.save();
         c.translate(y * 0.176f, 0);
         c.skew(-0.176f, 0);
@@ -177,20 +177,19 @@ final class HellHeaderView extends View {
         clockLayer(c, time, x + spread, y, w, h, gap, GLITCH_CYAN, 165);
         if (glitching) {
             float left = x - 40, right = x + 520;
-            for (int i = 0; i < 2; i++) {
-                float top = y + random.nextInt((int) h);
-                slices[i].set(left, top, right, top + 8 + random.nextInt(22));
+            for (RectF r : slices) {
+                float top = y - 10 + random.nextInt((int) h + 20);
+                r.set(left, top, right, top + 10 + random.nextInt(28));
             }
             c.save();
-            c.clipOutRect(slices[0]);
-            c.clipOutRect(slices[1]);
+            for (RectF r : slices) c.clipOutRect(r);
             clockLayer(c, time, x, y, w, h, gap, RED, 255);
             c.restore();
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < slices.length; i++) {
                 c.save();
                 c.clipRect(slices[i]);
-                clockLayer(c, time, x + (random.nextBoolean() ? 1 : -1) * (10 + random.nextInt(26)), y, w, h, gap,
-                        i == 0 ? RED : GLITCH_CYAN, 255);
+                clockLayer(c, time, x + (random.nextBoolean() ? 1 : -1) * (20 + random.nextInt(45)), y, w, h, gap,
+                        i == 1 ? GLITCH_CYAN : RED, 255);
                 c.restore();
             }
         } else {

@@ -62,6 +62,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         /** Hold OK on a tile: the activity shows the tile menu (move, remove from Home, app info). */
         void onTileLongPress(int position, View card);
         void onLibraryUp();
+        /** OK on the input_tiles "menu" tile: the activity opens its Inputs menu under that tile. */
+        void onInputsTile(View card);
     }
 
     static final class Entry {
@@ -518,7 +520,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.label.setText(e.label);
             h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
         }
-        h.card.setOnClickListener(v -> launch(e));
+        h.card.setOnClickListener(v -> {
+            if (e.kind == Entry.INPUT && e.component.getClassName().equals(INPUT_PREFIX + "menu")) listener.onInputsTile(v);
+            else launch(e);
+        });
         h.card.setOnLongClickListener(v -> {
             if (tileMenu) {
                 int pos = h.getBindingAdapterPosition();
