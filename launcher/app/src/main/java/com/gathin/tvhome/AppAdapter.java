@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.media.tv.TvContract;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -64,7 +65,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3, INPUT = 4;
 
         final int kind;
         final String label;
@@ -96,6 +97,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static final float FOCUS_SCALE = 1.10f;
+    /** Class-name prefix of an input tile's synthetic component, which keeps its key unique and stable. */
+    static final String INPUT_PREFIX = "input:";
     /** Design size of a tile (dp); tiles shrink from here when the columns don't fit, see tileWidthPx. */
     static final float DESIGN_W_DP = 180f, DESIGN_H_DP = 101f;
 
@@ -309,6 +312,14 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 fresh.add(new Entry(label, component, banner, icon));
             }
         }
+        // input_tiles: a tile per passthrough input ("inputId=Label=banner_name"), opening that input.
+        for (String spec : ctx.getResources().getStringArray(R.array.input_tiles)) {
+            String[] p = spec.split("=", 3);
+            if (p.length < 2 || p[0].trim().isEmpty()) continue;
+            Drawable banner = p.length > 2 ? bundledBanner(p[2].trim()) : null;
+            fresh.add(new Entry(Entry.INPUT, p[1].trim(), new ComponentName(ctx.getPackageName(), INPUT_PREFIX + p[0].trim()),
+                    banner, banner == null ? ctx.getDrawable(R.drawable.ic_input) : null, null, 0));
+        }
         Collections.sort(fresh, (a, b) -> {
             // The owner's own order first; tiles it does not know (new installs) follow by the rule below.
             int saved = Order.compare(savedRanks, a.component.flattenToShortString(), b.component.flattenToShortString());
@@ -319,6 +330,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (fb < 0) return -1;
                 return Integer.compare(fa, fb);
             }
+            // Input tiles come right after the configured dock apps, then cards, then the alphabetical grid.
+            boolean ia = a.kind == Entry.INPUT, ib = b.kind == Entry.INPUT;
+            if (ia != ib) return ia ? -1 : 1;
             // Cards come right after the configured dock apps, before the alphabetical grid.
             boolean ca = a.kind == Entry.CARD, cb = b.kind == Entry.CARD;
             if (ca != cb) return ca ? -1 : 1;
@@ -523,6 +537,16 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */
     private void launch(Entry e) {
+        if (e.kind == Entry.INPUT) {
+            String id = e.component.getClassName().substring(INPUT_PREFIX.length());
+            try {
+                ctx.startActivity(new Intent(Intent.ACTION_VIEW, TvContract.buildChannelUriForPassthroughInput(id))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (Exception ex) {
+                Toast.makeText(ctx, ctx.getString(R.string.cant_open, e.label), Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         if (e.kind == Entry.HOME_SETTINGS) {
             ctx.startActivity(new Intent(ctx, HomeSettingsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));

@@ -23,6 +23,7 @@
         <item>com.disney.disneyplus</item>
         <item>com.amazon.amazonvideo.livingroom</item>
         <item>com.wbd.stream</item>
+        <item>com.crunchyroll.crunchyroid</item>
     </string-array>
     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
@@ -88,6 +89,7 @@
         <item>com.crunchyroll.crunchyroid=banner_hc_crunchyroll</item>
         <item>com.apple.atve.androidtv.appletv=banner_hc_appletv</item>
         <item>com.google.android.youtube.tv=banner_hc_ytoriginal</item>
+        <item>com.android.vending=banner_hc_playstore</item>
     </string-array>
 
     <!-- TVs with no TvInputManager have no HDMI list to read, but their own source-selection panel
@@ -375,7 +377,7 @@
 
     <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
          shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->
-    <integer name="columns">6</integer>
+    <integer name="columns">7</integer>
 
     <!-- Basic motion is on; advanced effects are opt-in in the launcher's own Settings screen. -->
     <bool name="animations">true</bool>
@@ -496,4 +498,10 @@
     </string-array>
     <!-- HELL CITY header: date, network and segment clock drawn by HellHeaderView; the top bar is hidden. -->
     <bool name="hell_header">true</bool>
+    <!-- A tile per passthrough input, after the dock: "inputId=Label=banner_name". -->
+    <string-array name="input_tiles" translatable="false">
+        <item>com.tcl.tvinput/.passthroughinput.TvPassThroughService/HW1413744128=HDMI 1=banner_hc_hdmi1</item>
+        <item>com.tcl.tvinput/.passthroughinput.TvPassThroughService/HW1413744384=HDMI 2=banner_hc_hdmi2</item>
+        <item>com.tcl.tvinput/.passthroughinput.TvPassThroughService/HW1413744640=HDMI 3=banner_hc_hdmi3</item>
+    </string-array>
 </resources>

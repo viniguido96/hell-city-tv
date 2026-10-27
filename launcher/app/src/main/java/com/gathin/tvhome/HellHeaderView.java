@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.view.View;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 
 /**
  * HELL CITY header (hell_header): the parts of the top of Home that change. The day block, the date line with
@@ -38,10 +40,43 @@ final class HellHeaderView extends View {
     private final Typeface bold, medium;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("pt", "BR"));
     private String network;
+    // Glitch bursts: every 20-40 s while Home is on screen, a few frames 55 ms apart, then still again.
+    private static final int BURST_FRAMES = 7;
+    private static final long BURST_FRAME_MS = 55;
+    private final Random random = new Random();
+    private final RectF[] slices = {new RectF(), new RectF()};
+    private int burstFrame = -1;
+    private final Runnable burst = new Runnable() {
+        @Override public void run() {
+            burstFrame++;
+            if (burstFrame >= BURST_FRAMES) {
+                burstFrame = -1;
+                scheduleBurst();
+            } else {
+                postDelayed(this, BURST_FRAME_MS);
+            }
+            invalidate();
+        }
+    };
 
     private final BroadcastReceiver tick = new BroadcastReceiver() {
         @Override public void onReceive(Context c, Intent i) { invalidate(); }
     };
+
+    private void scheduleBurst() {
+        removeCallbacks(burst);
+        postDelayed(burst, 20_000 + random.nextInt(20_000));
+    }
+
+    @Override protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == VISIBLE) {
+            scheduleBurst();
+        } else {
+            removeCallbacks(burst);
+            burstFrame = -1;
+        }
+    }
 
     HellHeaderView(Context ctx) {
         super(ctx);
@@ -73,6 +108,7 @@ final class HellHeaderView extends View {
     }
 
     @Override protected void onDetachedFromWindow() {
+        removeCallbacks(burst);
         try {
             getContext().unregisterReceiver(tick);
         } catch (IllegalArgumentException ignored) {
@@ -128,15 +164,38 @@ final class HellHeaderView extends View {
         c.drawText(label, 112, 237, text);
     }
 
-    /** Seven-segment digits with cut ends, slanted, with red and cyan copies offset behind them. */
+    /** Seven-segment digits with cut ends, slanted, with red and cyan copies offset behind them. During a
+     *  glitch burst the copies spread further and two horizontal slices of the digits jump sideways. */
     private void drawClock(Canvas c, String time) {
         final float x = 1430, y = 70, w = 64, h = 120, gap = 22;
+        boolean glitching = burstFrame >= 0;
+        float spread = glitching ? 9 + random.nextInt(10) : 5;
         c.save();
         c.translate(y * 0.176f, 0);
         c.skew(-0.176f, 0);
-        clockLayer(c, time, x - 5, y, w, h, gap, GLITCH_RED, 190);
-        clockLayer(c, time, x + 5, y, w, h, gap, GLITCH_CYAN, 165);
-        clockLayer(c, time, x, y, w, h, gap, RED, 255);
+        clockLayer(c, time, x - spread, y, w, h, gap, GLITCH_RED, 190);
+        clockLayer(c, time, x + spread, y, w, h, gap, GLITCH_CYAN, 165);
+        if (glitching) {
+            float left = x - 40, right = x + 520;
+            for (int i = 0; i < 2; i++) {
+                float top = y + random.nextInt((int) h);
+                slices[i].set(left, top, right, top + 8 + random.nextInt(22));
+            }
+            c.save();
+            c.clipOutRect(slices[0]);
+            c.clipOutRect(slices[1]);
+            clockLayer(c, time, x, y, w, h, gap, RED, 255);
+            c.restore();
+            for (int i = 0; i < 2; i++) {
+                c.save();
+                c.clipRect(slices[i]);
+                clockLayer(c, time, x + (random.nextBoolean() ? 1 : -1) * (10 + random.nextInt(26)), y, w, h, gap,
+                        i == 0 ? RED : GLITCH_CYAN, 255);
+                c.restore();
+            }
+        } else {
+            clockLayer(c, time, x, y, w, h, gap, RED, 255);
+        }
         c.restore();
         int digits = 0;
         for (int i = 0; i < time.length(); i++) if (time.charAt(i) != ':') digits++;
