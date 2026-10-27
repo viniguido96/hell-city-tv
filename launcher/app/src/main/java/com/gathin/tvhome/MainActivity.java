@@ -448,7 +448,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambient.forceHasOverlappingRendering(false);
         ambientGlow = cfg.ambientGlow;
         appGlow = cfg.appGlow;
-        if (!ambientGlow) ambient.setVisibility(View.GONE);
+        // INVISIBLE, not GONE: with the glow view out of the layout the focus glass stopped sizing to its tile.
+        if (!ambientGlow) ambient.setVisibility(View.INVISIBLE);
         heroName = findViewById(R.id.heroName);
         hero = findViewById(R.id.hero);
         // The hero is now a group (name, and the cinematic lines): without this every fade of the default
