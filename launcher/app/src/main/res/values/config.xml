@@ -500,7 +500,7 @@
     <!-- HELL CITY header: date, network and segment clock drawn by HellHeaderView; the top bar is hidden. -->
     <bool name="hell_header">true</bool>
     <!-- Language of the HELL CITY header's weekday: "ja" (火曜日) or "zh" (星期二). -->
-    <string name="hell_lang" translatable="false">ja</string>
+    <string name="hell_lang" translatable="false">zh</string>
     <!-- Tiles at this percent of their worked-out size, and their corner radius (dp) at the design width. -->
     <integer name="tile_scale_percent">80</integer>
     <integer name="tile_corner_dp">2</integer>
