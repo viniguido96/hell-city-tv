@@ -46,18 +46,18 @@ final class HellHeaderView extends View {
     private final String langCity, langLocal;
     private final boolean zh;
     private static final int CITY_LABEL = 0xFFE5D16B;
-    // The city's Chinese name for the small line above the title; a city not listed keeps its own name.
+    // The city's name in Cantonese (Hong Kong characters) for the small line above the title; a city not listed keeps its own name.
     private static final Map<String, String> ZH_CITY = new HashMap<>();
     static {
         String[] pairs = {
-                "RECIFE", "累西腓", "OLINDA", "奥林达", "SAO PAULO", "圣保罗", "RIO DE JANEIRO", "里约热内卢",
-                "BRASILIA", "巴西利亚", "SALVADOR", "萨尔瓦多", "FORTALEZA", "福塔雷萨", "BELO HORIZONTE", "贝洛奥里藏特",
-                "MANAUS", "马瑙斯", "CURITIBA", "库里蒂巴", "PORTO ALEGRE", "阿雷格里港", "BELEM", "贝伦",
-                "GOIANIA", "戈亚尼亚", "FLORIANOPOLIS", "弗洛里亚诺波利斯", "NATAL", "纳塔尔", "JOAO PESSOA", "若昂佩索阿",
-                "MACEIO", "马塞约", "LISBON", "里斯本", "LISBOA", "里斯本", "PORTO", "波尔图", "MADRID", "马德里",
-                "BARCELONA", "巴塞罗那", "PARIS", "巴黎", "LONDON", "伦敦", "ROME", "罗马", "NEW YORK", "纽约",
-                "MIAMI", "迈阿密", "ORLANDO", "奥兰多", "BUENOS AIRES", "布宜诺斯艾利斯", "SANTIAGO", "圣地亚哥",
-                "TOKYO", "东京", "SHANGHAI", "上海", "BEIJING", "北京",
+                "RECIFE", "累西腓", "OLINDA", "奧林達", "SAO PAULO", "聖保羅", "RIO DE JANEIRO", "里約熱內盧",
+                "BRASILIA", "巴西利亞", "SALVADOR", "薩爾瓦多", "FORTALEZA", "福塔雷薩", "BELO HORIZONTE", "貝洛奧里藏特",
+                "MANAUS", "馬瑙斯", "CURITIBA", "庫里蒂巴", "PORTO ALEGRE", "阿雷格里港", "BELEM", "貝倫",
+                "GOIANIA", "戈亞尼亞", "FLORIANOPOLIS", "弗洛里亞諾波利斯", "NATAL", "納塔爾", "JOAO PESSOA", "若昂佩索阿",
+                "MACEIO", "馬塞約", "LISBON", "里斯本", "LISBOA", "里斯本", "PORTO", "波圖", "MADRID", "馬德里",
+                "BARCELONA", "巴塞隆拿", "PARIS", "巴黎", "LONDON", "倫敦", "ROME", "羅馬", "NEW YORK", "紐約",
+                "MIAMI", "邁阿密", "ORLANDO", "奧蘭多", "BUENOS AIRES", "布宜諾斯艾利斯", "SANTIAGO", "聖地牙哥",
+                "TOKYO", "東京", "SHANGHAI", "上海", "BEIJING", "北京",
         };
         for (int i = 0; i < pairs.length; i += 2) ZH_CITY.put(pairs[i], pairs[i + 1]);
     }
@@ -115,11 +115,13 @@ final class HellHeaderView extends View {
         zh = "zh".equals(ctx.getResources().getString(R.string.hell_lang));
         weekday = zh ? ZH_WEEKDAY : JP_WEEKDAY;
         langCity = zh ? "上海" : "東京";
-        langLocal = zh ? "本地时间" : "ローカル時間";
+        langLocal = zh ? "本地時間" : "ローカル時間";
         String known = CityLookup.cached(ctx);
         if (known != null) city = known;
         bold = ctx.getResources().getFont(R.font.barlow_condensed_bold);
         medium = ctx.getResources().getFont(R.font.barlow_condensed_medium);
+        // Hong Kong glyph forms for the Chinese (Cantonese) text, whatever the TV's own language.
+        if (zh) text.setTextLocale(Locale.forLanguageTag("zh-HK"));
         stroke.setStyle(Paint.Style.STROKE);
         setFocusable(false);
         setWillNotDraw(false);
