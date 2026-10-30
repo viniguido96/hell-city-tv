@@ -11,8 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.Normalizer;
-import java.util.Locale;
 
 /**
  * The city the TV is in, for the HELL CITY header, from the public IP (no location permission, no GPS on a TV).
@@ -36,13 +34,6 @@ final class CityLookup {
     /** The last city found, or null before the first answer. */
     static String cached(Context ctx) {
         return prefs(ctx).getString(KEY_CITY, null);
-    }
-
-    /** True for Recife, however the service spells it (accents, case). */
-    static boolean isRecife(String city) {
-        if (city == null) return false;
-        String plain = Normalizer.normalize(city, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        return plain.trim().toUpperCase(Locale.ROOT).equals("RECIFE");
     }
 
     /** Looks the city up in the background when the last answer is old; the listener runs on the main thread. */

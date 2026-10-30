@@ -36,7 +36,7 @@ final class HellHeaderView extends View {
     private static final String[] ZH_WEEKDAY = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
     private final String[] weekday;
     // The title, the status line under the network box and the line under the clock name the city (CityLookup):
-    // HELL CITY // RECIFE at home, just the city anywhere else. Recife until the first lookup answers.
+    // G-TV // and the city. Recife until the first lookup answers.
     private static final int TITLE = 0xFFDCA229, TITLE_RED = 0xB3FF2A4F, TITLE_CYAN = 0x9928E6F0,
             STATUS = 0xFF7A6A3A, OUTLINE = 0xD90A0A0A;
     private static final float TITLE_ROOM = 770 - 212 - 24;   // up to the ADS/TELEMETRY pill
@@ -74,14 +74,6 @@ final class HellHeaderView extends View {
     private final BroadcastReceiver tick = new BroadcastReceiver() {
         @Override public void onReceive(Context c, Intent i) { invalidate(); }
     };
-
-    /** A glitch burst right away (the TV just woke), then the usual schedule. */
-    void burstNow() {
-        removeCallbacks(burst);
-        burstFrame = 0;
-        invalidate();
-        postDelayed(burst, BURST_FRAME_MS);
-    }
 
     private void scheduleBurst() {
         removeCallbacks(burst);
@@ -171,7 +163,7 @@ final class HellHeaderView extends View {
      *  and the LOCAL_TIME line under the clock, all three naming the city. */
     private void drawCity(Canvas c, Calendar now) {
         String name = city.toUpperCase(new Locale("pt", "BR"));
-        String title = CityLookup.isRecife(city) ? "HELL CITY // " + name : name;
+        String title = "G-TV // " + name;
         text.setTypeface(bold);
         text.setTextAlign(Paint.Align.LEFT);
         text.setTextSkewX(-0.21f);
