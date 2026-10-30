@@ -18,7 +18,7 @@
     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
     <string-array name="dock_apps">
         <item>com.netflix.ninja</item>
-        <item>org.smarttube.stable</item>
+        <item>com.google.android.youtube.tv</item>
         <item>com.crunchyroll.crunchyroid</item>
         <item>com.disney.disneyplus</item>
         <item>com.amazon.amazonvideo.livingroom</item>
@@ -37,7 +37,7 @@
         <item>br.eddy.tvhome</item>
         <item>com.spocky.projengmenu</item>
         <item>com.globo.globotv</item>
-        <item>com.google.android.youtube.tv</item>
+        <item>org.smarttube.stable</item>
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
@@ -81,7 +81,7 @@
          launcher (res/drawable). banner_tv is a magenta field with the Live TV glyph. -->
     <string-array name="app_banners">
         <item>com.netflix.ninja=banner_hc_netflix</item>
-        <item>org.smarttube.stable=banner_hc_youtube</item>
+        <item>com.google.android.youtube.tv=banner_hc_youtube</item>
         <item>com.globo.globotv=banner_hc_globoplay</item>
         <item>com.disney.disneyplus=banner_hc_disney</item>
         <item>com.amazon.amazonvideo.livingroom=banner_hc_prime</item>
@@ -89,7 +89,7 @@
         <item>io.github.jqssun.airplay=banner_hc_airplay</item>
         <item>com.crunchyroll.crunchyroid=banner_hc_crunchyroll</item>
         <item>com.apple.atve.androidtv.appletv=banner_hc_appletv</item>
-        <item>com.google.android.youtube.tv=banner_hc_ytoriginal</item>
+        <item>org.smarttube.stable=banner_hc_ytoriginal</item>
         <item>com.android.vending=banner_hc_playstore</item>
     </string-array>
 

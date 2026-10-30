@@ -20,7 +20,8 @@ import java.util.Random;
 /**
  * HELL CITY header (hell_header): the parts of the top of Home that change. The day block, the date line with
  * the weekday in Japanese, the NET_LINK box with the Wi-Fi name and a seven-segment clock with a red/cyan
- * offset. Everything that never changes (title, katakana, pill, frame) is baked into the theme's wallpaper.
+ * offset, and the city lines (CityLookup). Everything that never changes (katakana, pill, frame) is baked into
+ * the theme's wallpaper.
  * Drawn in the wallpaper's 1920x1080 coordinates and scaled to the view, so the two line up on any density.
  * It redraws once a minute, on the system time tick; nothing animates.
  */
@@ -34,6 +35,13 @@ final class HellHeaderView extends View {
     private static final String[] JP_WEEKDAY = {"日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"};
     private static final String[] ZH_WEEKDAY = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
     private final String[] weekday;
+    // The title, the status line under the network box and the line under the clock name the city (CityLookup):
+    // HELL CITY // RECIFE at home, just the city anywhere else. Recife until the first lookup answers.
+    private static final int TITLE = 0xFFDCA229, TITLE_RED = 0xB3FF2A4F, TITLE_CYAN = 0x9928E6F0,
+            STATUS = 0xFF7A6A3A, OUTLINE = 0xD90A0A0A;
+    private static final float TITLE_ROOM = 770 - 212 - 24;   // up to the ADS/TELEMETRY pill
+    private final String langCity, langLocal;
+    private String city = "Recife";
     // Segments a..g of each digit, as in a seven-segment display.
     private static final String[] SEGMENTS = {"abcdef", "bc", "abged", "abgcd", "fgbc", "afgcd", "afgedc", "abc", "abcdefg", "abcfgd"};
 
@@ -92,7 +100,12 @@ final class HellHeaderView extends View {
 
     HellHeaderView(Context ctx) {
         super(ctx);
-        weekday = "zh".equals(ctx.getResources().getString(R.string.hell_lang)) ? ZH_WEEKDAY : JP_WEEKDAY;
+        boolean zh = "zh".equals(ctx.getResources().getString(R.string.hell_lang));
+        weekday = zh ? ZH_WEEKDAY : JP_WEEKDAY;
+        langCity = zh ? "上海" : "東京";
+        langLocal = zh ? "本地时间" : "ローカル時間";
+        String known = CityLookup.cached(ctx);
+        if (known != null) city = known;
         bold = ctx.getResources().getFont(R.font.barlow_condensed_bold);
         medium = ctx.getResources().getFont(R.font.barlow_condensed_medium);
         stroke.setStyle(Paint.Style.STROKE);
@@ -107,6 +120,14 @@ final class HellHeaderView extends View {
             network = n;
             invalidate();
         }
+        if (n != null) lookUpCity();
+    }
+
+    private void lookUpCity() {
+        CityLookup.refresh(getContext(), found -> {
+            city = found;
+            invalidate();
+        });
     }
 
     @Override protected void onAttachedToWindow() {
@@ -117,6 +138,7 @@ final class HellHeaderView extends View {
         f.addAction(Intent.ACTION_DATE_CHANGED);
         if (Build.VERSION.SDK_INT >= 33) getContext().registerReceiver(tick, f, Context.RECEIVER_NOT_EXPORTED);
         else getContext().registerReceiver(tick, f);
+        lookUpCity();
         invalidate();
     }
 
@@ -134,6 +156,7 @@ final class HellHeaderView extends View {
         canvas.save();
         canvas.scale(k, k);
         Calendar now = Calendar.getInstance();
+        drawCity(canvas, now);
         drawDate(canvas, now);
         drawNetwork(canvas);
         // The clock at 70% of its design size, pinned at its top-right corner.
@@ -142,6 +165,55 @@ final class HellHeaderView extends View {
         drawClock(canvas, String.format(Locale.ROOT, "%02d:%02d", now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE)));
         canvas.restore();
         canvas.restore();
+    }
+
+    /** The title in bold italic with red and cyan copies offset behind it, the status line under the network box
+     *  and the LOCAL_TIME line under the clock, all three naming the city. */
+    private void drawCity(Canvas c, Calendar now) {
+        String name = city.toUpperCase(new Locale("pt", "BR"));
+        String title = CityLookup.isRecife(city) ? "HELL CITY // " + name : name;
+        text.setTypeface(bold);
+        text.setTextAlign(Paint.Align.LEFT);
+        text.setTextSkewX(-0.21f);
+        text.setLetterSpacing(0.0625f);
+        text.setTextSize(48);
+        float wide = text.measureText(title);
+        if (wide > TITLE_ROOM) text.setTextSize(48 * TITLE_ROOM / wide);
+        text.setColor(TITLE_RED);
+        c.drawText(title, 209, 124, text);
+        text.setColor(TITLE_CYAN);
+        c.drawText(title, 215, 124, text);
+        text.setColor(TITLE);
+        c.drawText(title, 212, 124, text);
+        text.setTextSkewX(0);
+
+        text.setTypeface(Typeface.MONOSPACE);
+        text.setLetterSpacing(0);
+        text.setTextSize(13);
+        outlined(c, "ADS: BLOCKED · TELEMETRY: SEVERED · " + langCity + " → " + name
+                + " · 01001000 01000101 01001100 01001100", 96, 284, STATUS);
+        text.setTextAlign(Paint.Align.RIGHT);
+        text.setTextSize(15);
+        outlined(c, "LOCAL_TIME // " + langLocal + " · " + utcOffset(now) + " · " + name, 1824, 192, CLOCK);
+    }
+
+    /** Text with the wallpaper's dark outline under it, so it reads over a bright patch of the city. */
+    private void outlined(Canvas c, String s, float x, float y, int color) {
+        text.setStyle(Paint.Style.STROKE);
+        text.setStrokeWidth(5);
+        text.setStrokeJoin(Paint.Join.ROUND);
+        text.setColor(OUTLINE);
+        c.drawText(s, x, y, text);
+        text.setStyle(Paint.Style.FILL);
+        text.setColor(color);
+        c.drawText(s, x, y, text);
+    }
+
+    private static String utcOffset(Calendar now) {
+        int minutes = now.getTimeZone().getOffset(now.getTimeInMillis()) / 60_000;
+        String sign = minutes < 0 ? "-" : "+";
+        minutes = Math.abs(minutes);
+        return "UTC" + sign + (minutes / 60) + (minutes % 60 == 0 ? "" : String.format(Locale.ROOT, ":%02d", minutes % 60));
     }
 
     private void drawDate(Canvas c, Calendar now) {
